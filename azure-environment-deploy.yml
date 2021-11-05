@@ -1,0 +1,14 @@
+parameters:
+  - name: env
+    type: string
+jobs:
+  - job: owaspzapscan
+    displayName: OWASP ZAP Scan
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: owasp-zap-steps-template.yml
+      parameters:
+        results: ${{parameters.env}}
+        targetUrl: 'https://devsecopsgoat.azurewebsites.net'
+        port: 443

@@ -1,0 +1,198 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "sites_devsecopsgoat_name": {
+            "defaultValue": "devsecopsgoat",
+            "type": "String"
+        },
+        "serverfarms_WebGoatNET20211029131041Plan_externalid": {
+            "defaultValue": "/subscriptions/44d70aa5-3feb-42f4-8313-904a13deffd6/resourceGroups/hdc_2021_devsecops/providers/Microsoft.Web/serverfarms/WebGoatNET20211029131041Plan",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-02-01",
+            "name": "[parameters('sites_devsecopsgoat_name')]",
+            "location": "South Central US",
+            "tags": {
+                "hidden-related:/subscriptions/44d70aa5-3feb-42f4-8313-904a13deffd6/resourceGroups/hdc_2021_devsecops/providers/Microsoft.Web/serverFarms/WebGoatNET20211029131041Plan": "empty"
+            },
+            "kind": "app",
+            "identity": {
+                "principalId": "1f2198fc-ee2f-4b81-98cd-064a528ee6c0",
+                "tenantId": "391f0635-6a9f-493f-beb1-229e16b6a485",
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "[concat(parameters('sites_devsecopsgoat_name'), '.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "[concat(parameters('sites_devsecopsgoat_name'), '.scm.azurewebsites.net')]",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[parameters('serverfarms_WebGoatNET20211029131041Plan_externalid')]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "acrUseManagedIdentityCreds": false,
+                    "alwaysOn": false,
+                    "http20Enabled": false,
+                    "functionAppScaleLimit": 0,
+                    "minimumElasticInstanceCount": 0
+                },
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "clientCertMode": "Required",
+                "hostNamesDisabled": false,
+                "customDomainVerificationId": "371D9926F0097F691CB28E4B0AF45FFC8A1488151A10E3A6E45F4A191A2F07F1",
+                "containerSize": 0,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": true,
+                "redundancyMode": "None",
+                "storageAccountRequired": false,
+                "keyVaultReferenceIdentity": "SystemAssigned"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2021-02-01",
+            "name": "[concat(parameters('sites_devsecopsgoat_name'), '/ftp')]",
+            "location": "South Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_devsecopsgoat_name'))]"
+            ],
+            "tags": {
+                "hidden-related:/subscriptions/44d70aa5-3feb-42f4-8313-904a13deffd6/resourceGroups/hdc_2021_devsecops/providers/Microsoft.Web/serverFarms/WebGoatNET20211029131041Plan": "empty"
+            },
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/basicPublishingCredentialsPolicies",
+            "apiVersion": "2021-02-01",
+            "name": "[concat(parameters('sites_devsecopsgoat_name'), '/scm')]",
+            "location": "South Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_devsecopsgoat_name'))]"
+            ],
+            "tags": {
+                "hidden-related:/subscriptions/44d70aa5-3feb-42f4-8313-904a13deffd6/resourceGroups/hdc_2021_devsecops/providers/Microsoft.Web/serverFarms/WebGoatNET20211029131041Plan": "empty"
+            },
+            "properties": {
+                "allow": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2021-02-01",
+            "name": "[concat(parameters('sites_devsecopsgoat_name'), '/web')]",
+            "location": "South Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_devsecopsgoat_name'))]"
+            ],
+            "tags": {
+                "hidden-related:/subscriptions/44d70aa5-3feb-42f4-8313-904a13deffd6/resourceGroups/hdc_2021_devsecops/providers/Microsoft.Web/serverFarms/WebGoatNET20211029131041Plan": "empty"
+            },
+            "properties": {
+                "numberOfWorkers": 1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php",
+                    "hostingstart.html"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "httpLoggingEnabled": false,
+                "acrUseManagedIdentityCreds": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$devsecopsgoat",
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "vnetRouteAllEnabled": false,
+                "vnetPrivatePortsCount": 0,
+                "localMySqlEnabled": false,
+                "managedServiceIdentityId": 8401,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "scmMinTlsVersion": "1.0",
+                "ftpsState": "FtpsOnly",
+                "preWarmedInstanceCount": 0,
+                "functionAppScaleLimit": 0,
+                "functionsRuntimeScaleMonitoringEnabled": false,
+                "minimumElasticInstanceCount": 0,
+                "azureStorageAccounts": {}
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2021-02-01",
+            "name": "[concat(parameters('sites_devsecopsgoat_name'), '/', parameters('sites_devsecopsgoat_name'), '.azurewebsites.net')]",
+            "location": "South Central US",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', parameters('sites_devsecopsgoat_name'))]"
+            ],
+            "properties": {
+                "siteName": "devsecopsgoat",
+                "hostNameType": "Verified"
+            }
+        }
+    ]
+}

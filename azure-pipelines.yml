@@ -1,0 +1,88 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- main
+
+variables:
+  solution: '*/*Core.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+stages:
+- stage: 'BuildTest'
+  displayName: Build Test Publish
+  jobs:
+    - job: BuildTestPublish
+      displayName: Build Test Publish
+      pool:
+        vmImage: 'ubuntu-latest'
+      steps:
+      - task: NuGetToolInstaller@1
+
+      - task: NuGetCommand@2
+        inputs:
+          restoreSolution: '$(solution)'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build the project - $(buildConfiguration)'
+        inputs:
+          command: 'build'
+          projects: '**/WebGoatCore.csproj'
+          arguments: '-c $(buildConfiguration)'
+
+      - task: WhiteSource Bolt@20
+        displayName: Whitesource Bolt Vulnerabilities Scan
+        inputs:
+          cwd: 'WebGoatCore'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Publish the project - $(buildConfiguration)'
+        inputs:
+          command: 'publish'
+          publishWebProjects: false
+          projects: '**/WebGoatCore.csproj'
+          arguments: '-c Release -o publish'
+          zipAfterPublish: true
+
+      - publish: 'publish'
+        artifact: drop
+
+######
+- stage: Dev
+  displayName: Development Environment
+  dependsOn: BuildTest
+  jobs:
+  - deployment: webdeployment
+    displayName: Deploy Web App
+    environment: dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureRmWebAppDeployment@4
+            displayName: Deploy WebApp
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Visual Studio Enterprise Subscription – MPN(44d70aa5-3feb-42f4-8313-904b13deffd6)'
+              appType: 'webApp'
+              WebAppName: 'devsecopsgoat'
+              deployToSlotOrASE: true
+              ResourceGroupName: 'hdc_2021_devsecops'
+              SlotName: 'production'
+              packageForLinux: '$(Pipeline.Workspace)/**/*.zip'
+              enableCustomDeployment: true
+              DeploymentType: 'zipDeploy'
+              TakeAppOfflineFlag: false
+            enabled: true
+  - job: owaspzapscan
+    displayName: OWASP ZAP Scan
+    dependsOn: webdeployment
+    steps:
+    - template: owasp-zap-steps-template.yml
+      parameters:
+        results: dev
+        targetUrl: 'https://devsecopsgoat.azurewebsites.net'
+        port: 443
